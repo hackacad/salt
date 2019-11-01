@@ -22,16 +22,12 @@ log = logging.getLogger(__name__)
 
 def __virtual__():
     '''
-    Only works on OpenBSD and FreeBSD for now; other systems with pf (macOS,
-    FreeBSD, etc) need to be tested before enabling them.
+    Salt Module for OpenBSD Paket Filter
     '''
-    tested_oses = ['FreeBSD', 'OpenBSD']
-    if __grains__['os'] in tested_oses and salt.utils.path.which('pfctl'):
+    if salt.utils.path.which('pfctl'):
         return True
 
-    return (False, 'The pf execution module cannot be loaded: either the '
-            'OS (' + __grains__['os'] + ') is not tested or the pfctl binary '
-            'was not found')
+    return (False, 'The pf execution module cannot be loaded: either the system is not OpenBSD/FreeBSD or the pfctl binary was not found')
 
 
 def enable():
@@ -102,7 +98,7 @@ def loglevel(level):
 
     level:
         Log level. Should be one of the following: emerg, alert, crit, err, warning, notice,
-        info or debug (OpenBSD); or none, urgent, misc, loud (FreeBSD).
+        info or debug.
 
     CLI example:
 
@@ -114,11 +110,7 @@ def loglevel(level):
     # always made a change.
     ret = {'changes': True}
 
-    myos = __grains__['os']
-    if myos == 'FreeBSD':
-        all_levels = ['none', 'urgent', 'misc', 'loud']
-    else:
-        all_levels = ['emerg', 'alert', 'crit', 'err', 'warning', 'notice', 'info', 'debug']
+    all_levels = ['emerg', 'alert', 'crit', 'err', 'warning', 'notice', 'info', 'debug']
     if level not in all_levels:
         raise SaltInvocationError('Unknown loglevel: {0}'.format(level))
 
@@ -318,7 +310,10 @@ def show(modifier):
         Modifier to apply for filtering. Only a useful subset of what pfctl supports
         can be used with Salt.
 
+        - info
+        - nat
         - rules
+        - Running
         - states
         - tables
 
@@ -332,7 +327,7 @@ def show(modifier):
     ret = {'changes': False}
 
     capital_modifiers = ['Tables']
-    all_modifiers = ['rules', 'states', 'tables']
+    all_modifiers = ['info', 'nat', 'rules', 'Running', 'states', 'tables']
     all_modifiers += capital_modifiers
     if modifier.title() in capital_modifiers:
         modifier = modifier.title()
