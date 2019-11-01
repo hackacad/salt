@@ -27,7 +27,7 @@ def __virtual__():
     if salt.utils.path.which('pfctl'):
         return True
 
-    return (False, 'The pf execution module cannot be loaded: either the system is not OpenBSD/FreeBSD or the pfctl binary was not found')
+    return (False, 'The pf execution module cannot be loaded: the pfctl binary was not found')
 
 
 def enable():
